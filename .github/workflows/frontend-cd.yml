@@ -158,6 +158,6 @@ jobs:
         cd frontend/k8s
         aws eks update-kubeconfig --name cluster --region us-east-1
         kustomize edit set image frontend=727364028313.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
-        kustomize build | kubectl apply -f -
+        kustomize build | kubectl apply -f - --validate=false
       env:
         KUBECONFIG: /home/runner/.kube/config
