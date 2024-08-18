@@ -118,30 +118,30 @@ jobs:
           docker tag frontend:latest 727364028313.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
           docker push 727364028313.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
 
-    - name: Install kubectl
-      run: |
-        curl -sLO https://storage.googleapis.com/kubernetes-release/release/v1.19.9/bin/linux/amd64/kubectl
-        chmod +x ./kubectl
-        sudo mv ./kubectl /usr/local/bin/
+    # - name: Install kubectl
+    #   run: |
+    #     curl -sLO https://storage.googleapis.com/kubernetes-release/release/v1.19.9/bin/linux/amd64/kubectl
+    #     chmod +x ./kubectl
+    #     sudo mv ./kubectl /usr/local/bin/
     
-    - name: Check kubectl version
-      run: kubectl version --client
+    # - name: Check kubectl version
+    #   run: kubectl version --client
 
-    - name: Display kubectl help
-      run: kubectl help
+    # - name: Display kubectl help
+    #   run: kubectl help
 
-    - name: Install Kustomize
-      run: |
-        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-        sudo mv kustomize /usr/local/bin/
+    # - name: Install Kustomize
+    #   run: |
+    #     curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+    #     sudo mv kustomize /usr/local/bin/
     
-    - name: Check Kustomize version
-      run: kustomize version
+    # - name: Check Kustomize version
+    #   run: kustomize version
 
-    - name: Update AWS CLI
-      run: |
-        sudo apt-get install -y awscli
-        aws --version
+    # - name: Update AWS CLI
+    #   run: |
+    #     sudo apt-get install -y awscli
+    #     aws --version
   
     - name: Add AWS EKS cluster to kubeconfig
       run: |
@@ -158,6 +158,6 @@ jobs:
         cd frontend/k8s
         aws eks update-kubeconfig --name cluster --region us-east-1
         kustomize edit set image frontend=727364028313.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
-        kustomize build | kubectl apply -f - --validate=false
+        kustomize build | kubectl apply -f -
       env:
         KUBECONFIG: /home/runner/.kube/config
