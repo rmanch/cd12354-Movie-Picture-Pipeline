@@ -155,6 +155,7 @@ jobs:
         
         # Display the updated kubeconfig content (optional, for verification)
         cat $KUBECONFIG_PATH
+        cd frontend/k8s
         kustomize edit set image frontend=727364028313.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
         kustomize build | kubectl apply -f - --validate=false
       env:
