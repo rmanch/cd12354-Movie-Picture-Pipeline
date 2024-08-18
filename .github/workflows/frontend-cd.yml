@@ -151,19 +151,11 @@ jobs:
         # Set the path for the kubeconfig file
         KUBECONFIG_PATH=/home/runner/.kube/config
         # Update kubeconfig with AWS EKS cluster
-        aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig $KUBECONFIG_PATH
+        aws eks --region us-east-1 update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig $KUBECONFIG_PATH
         
         # Display the updated kubeconfig content (optional, for verification)
         cat $KUBECONFIG_PATH
+        kustomize edit set image frontend=727364028313.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+        kustomize build | kubectl apply -f - --validate=false
       env:
         KUBECONFIG: /home/runner/.kube/config
-
-    - name: Deploy to EKS
-      run: |
-        cd frontend/k8s
-        kustomize edit set image frontend=727364028313.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
-    
-    - name: Apply the manifests to the cluster
-      run: |
-        cd frontend/k8s
-        kustomize build | kubectl apply -f - --validate=false
