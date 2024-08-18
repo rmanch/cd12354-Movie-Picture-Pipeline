@@ -158,15 +158,12 @@ jobs:
       env:
         KUBECONFIG: /home/runner/.kube/config
 
-    - name: Check kubectl commands
-      run: kubectl get pods
-
     - name: Deploy to EKS
       run: |
-        cd starter/frontend/k8s
+        cd frontend/k8s
         kustomize edit set image frontend=727364028313.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
     
     - name: Apply the manifests to the cluster
       run: |
-        cd starter/frontend/k8s
+        cd frontend/k8s
         kustomize build | kubectl apply -f - --validate=false
