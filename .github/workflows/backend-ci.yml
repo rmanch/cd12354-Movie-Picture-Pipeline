@@ -34,8 +34,8 @@ jobs:
     # Install the dependencies.
     - name: Install the dependencies
       run: |
-        cd backend && pipenv install
- 
+        cd backend && pipenv install && python3 -m pip install flake8
+
     # Run the linter
     -  name: Run the linter 
        run: |
