@@ -1,0 +1,152 @@
+name: Frontend Continuous Deployment
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+    - main   
+  
+env:
+  # Set Node.js Version
+  NODE_VERSION: '18.x'
+  AWS_REGION: us-east-1     # Update this to your AWS Region
+  TF_ACTION_WORKING_DIR: 'terraform' # Update this to your Terraform files directory
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+
+    # Set up a Node.js environment using the specified node version.
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    # Install the dependencies.
+    - name: Install the dependencies
+      run: |
+        cd frontend && npm ci
+ 
+    # Run the linter
+    -  name: Run the linter 
+       run: |
+        cd frontend && npm run lint   
+   
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+
+    # Set up a Node.js environment using the specified node version.
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    # Install the dependencies.
+    - name: Install the dependencies
+      run: |
+        cd frontend && npm ci
+    
+    # Run the linter
+    - name: Run the test 
+      run: |
+        cd frontend && npm run test   
+                            
+    # Run the tests.
+    - run: |
+       cd frontend && npm test
+
+  build:  
+   needs: [lint, test]     
+   runs-on: ubuntu-latest
+
+   steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+
+    # Set up a Node.js environment using the specified node version.
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    # Install the dependencies.
+    - name: Install the dependencies
+      run: |
+        cd frontend && npm ci
+    
+    # Run the test
+    - name: Run the test 
+      run: |
+        cd frontend && npm run test
+
+    # Build the application
+    - name: Build the application
+      run: |
+        cd frontend && docker build -t rahulmanchanda/movie-picture/frontend:0.1 .
+
+  deploy:  
+   needs: [build]     
+   runs-on: ubuntu-latest
+
+   steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+      
+    # Set up a Node.js environment using the specified node version.
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    # Install the dependencies.
+    - name: Install the dependencies
+      run: |
+        cd frontend && npm ci
+    
+    # Run the test
+    - name: Run the test 
+      run: |
+        cd frontend && npm run test
+
+    # Build the application
+    - name: Build the application
+      run: |
+        cd frontend && docker build -t rahulmanchanda/movie-picture/frontend:0.1 .  
+        
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
+        aws-region: ${{ env.AWS_REGION }} # Use the region from your environment variables
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+
+    - name: Terraform Initialize
+      run: terraform init
+
+    - name: Terraform Validate
+      run: terraform validate 
+
+    - name: Terraform Plan
+      run: terraform plan 
+      continue-on-error: true
+
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve
+
+  #  - name: Terraform Destroy
+   #   run:  terraform plan -destroy
+        
