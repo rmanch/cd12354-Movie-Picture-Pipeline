@@ -1,0 +1,66 @@
+name: Frontend Continuous Integration
+on:
+  workflow_dispatch:
+  
+env:
+  # Set Node.js Version
+  NODE_VERSION: '18.x'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+
+    # Set up a Node.js environment using the specified node version.
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    # Install the dependencies.
+    - name: Install the dependencies
+      run: |
+        cd frontend && npm ci
+ 
+    # Run the linter
+    -  name: Run the linter 
+       run: |
+        cd frontend && npm run lint   
+   
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+
+    # Set up a Node.js environment using the specified node version.
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    # Install the dependencies.
+    - name: Install the dependencies
+      run: |
+        cd frontend && npm ci
+    
+    # Run the linter
+    - name: Run the test 
+      run: |
+        cd frontend && npm run test   
+                            
+    # Run the tests.
+    - run: |
+       cd module4_cicd/CI-FullstackApp/backend && npm test
+
+  build:       
+   runs-on: ubuntu-latest
+
+   steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+      
