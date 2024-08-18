@@ -53,17 +53,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-  
-      # Set up pipenv 
-      - name: Use pipenv ${{ env.PIP_VERSION }}
-        uses: tiagovrtr/actions-pipenv@v1
-        with:
-          pipenv-version: ${{ env.PIP_VERSION }}
+
 
       # Install the dependencies.
       - name: Install the dependencies
         run: |
-          cd backend && pipenv install
+          cd backend && pipenv install 
    
       # Run the linter
       -  name: Run the test 
@@ -83,6 +78,12 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
+
+      # Set up pipenv 
+    - name: Use pipenv ${{ env.PIP_VERSION }}
+      uses: tiagovrtr/actions-pipenv@v1
+      with:
+          pipenv-version: ${{ env.PIP_VERSION }}
 
     # Install the dependencies.
     - name: Install the dependencies
