@@ -54,6 +54,11 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      # Set up pipenv 
+      - name: Use pipenv ${{ env.PIP_VERSION }}
+        uses: tiagovrtr/actions-pipenv@v1
+        with:
+          pipenv-version: ${{ env.PIP_VERSION }}
 
       # Install the dependencies.
       - name: Install the dependencies
