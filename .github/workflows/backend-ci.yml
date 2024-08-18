@@ -1,0 +1,87 @@
+name: Backend Continuous Integration
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+    - main   
+  
+env:
+  # Set Python Version
+  PYTHON_VERSION: '3.10'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    # Set up python environment using the specified python version.
+    - name: Use Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    # Install the dependencies.
+    - name: Install the dependencies
+      run: |
+        cd backend && pipenv install
+ 
+    # Run the linter
+    -  name: Run the linter 
+       run: |
+        cd backend && pipenv run lint  
+   
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+  
+      # Set up python environment using the specified python version.
+      - name: Use Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+  
+      # Install the dependencies.
+      - name: Install the dependencies
+        run: |
+          cd backend && pipenv install
+   
+      # Run the linter
+      -  name: Run the test 
+         run: |
+          cd backend && pipenv run test  
+
+  build:  
+   needs: [lint, test]     
+   runs-on: ubuntu-latest
+
+   steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    # Set up python environment using the specified python version.
+    - name: Use Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    # Install the dependencies.
+    - name: Install the dependencies
+      run: |
+        cd backend && pipenv install
+
+    # Run the linter
+    -  name: Run the test 
+       run: |
+        cd backend && pipenv run test  
+
+    # Build the application
+    - name: Build the application
+      run: |
+        cd backend && docker build -t rahulmanchanda/movie-picture/backend:0.1 .
