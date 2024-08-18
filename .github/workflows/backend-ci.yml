@@ -9,6 +9,7 @@ on:
 env:
   # Set Python Version
   PYTHON_VERSION: '3.10'
+  PIP_VERSION: 'v2022.9.21'
 
 jobs:
   lint:
@@ -23,6 +24,12 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
+
+    # Set up pipenv 
+    - name: Use pipenv ${{ env.PIP_VERSION }}
+      uses: tiagovrtr/actions-pipenv@v1
+      with:
+        pipenv-version: ${{ env.PYTHON_VERSION }}
 
     # Install the dependencies.
     - name: Install the dependencies
