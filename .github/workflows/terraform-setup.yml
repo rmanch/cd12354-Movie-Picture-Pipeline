@@ -33,19 +33,23 @@ jobs:
       run: |
         cd setup/terraform && terraform validate 
 
-    - name: Terraform Plan
+    - name: Terraform Destroy
       run: |
-         cd setup/terraform && terraform plan 
+       terraform apply -destroy
+
+
+   # - name: Terraform Plan
+   #   run: |
+   #      cd setup/terraform && terraform plan 
      # continue-on-error: true
 
-    - name: Terraform Apply
+   # - name: Terraform Apply
      # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: |
-         echo github.ref
-         echo github.event_name
-         cd setup/terraform && terraform apply -auto-approve
-         continue-on-error: true
+   #   run: |
+    #     echo github.ref
+     #    echo github.event_name
+     #    cd setup/terraform && terraform apply -auto-approve
+     #    continue-on-error: true
 
-    # - name: Terraform Destroy
-    #   run:  terraform apply -destroy
+
         
