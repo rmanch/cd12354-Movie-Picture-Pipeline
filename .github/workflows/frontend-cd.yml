@@ -113,5 +113,8 @@ jobs:
         IMAGE_TAG: ${{ github.sha }}
       run: |
           cd frontend/k8s
+          echo $KUBECONFIG
+          KUBECONFIG=~/.kube/config
+          kubectl get pods
           kubectl apply -f deployment.yaml --validate=false
           kubectl apply -f service.yaml --validate=false
