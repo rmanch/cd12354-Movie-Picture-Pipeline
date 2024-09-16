@@ -36,7 +36,7 @@ jobs:
     - name: Terraform Plan
       run: |
          cd setup/terraform && terraform plan 
-      continue-on-error: true
+     # continue-on-error: true
 
     - name: Terraform Apply
      # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -46,6 +46,6 @@ jobs:
          cd setup/terraform && terraform apply -auto-approve
          continue-on-error: true
 
-    - name: Terraform Destroy
-      run:  terraform apply -destroy
+    # - name: Terraform Destroy
+    #   run:  terraform apply -destroy
         
