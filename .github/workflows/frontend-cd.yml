@@ -103,6 +103,7 @@ jobs:
         IMAGE_TAG: ${{ github.sha }}
       run: |
         cd frontend
+        echo $REACT_APP_MOVIE_API_URL
         docker build --build-arg=REACT_APP_MOVIE_API_URL="http://$REACT_APP_MOVIE_API_URL/"  -t $REGISTRY/$REPOSITORY:${GITHUB_SHA::7} .
         docker push $REGISTRY/$REPOSITORY:${GITHUB_SHA::7}
 
