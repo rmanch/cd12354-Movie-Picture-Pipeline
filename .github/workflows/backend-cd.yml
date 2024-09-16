@@ -1,0 +1,153 @@
+name: Backend Continuous Integration
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+    - main   
+  
+env:
+  # Set Python Version
+  PYTHON_VERSION: '3.10'
+  PIP_VERSION: 'v2022.9.21'
+  NODE_VERSION: '18.x'
+  AWS_REGION: us-east-1     # Update this to your AWS Region
+  TF_ACTION_WORKING_DIR: 'terraform' # Update this to your Terraform files directory
+  REACT_APP_MOVIE_API_URL: 'http://localhost:5000'
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  EKS_CLUSTER_NAME: cluster
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    # Set up python environment using the specified python version.
+    - name: Use Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    # Set up pipenv 
+    - name: Use pipenv ${{ env.PIP_VERSION }}
+      uses: tiagovrtr/actions-pipenv@v1
+      with:
+        pipenv-version: ${{ env.PIP_VERSION }}
+
+    # Install the dependencies.
+    - name: Install the dependencies
+      run: |
+        cd backend && pipenv install && python3 -m pip install flake8
+
+    # Run the linter
+    -  name: Run the linter 
+       run: |
+        cd backend && pipenv run lint  
+   
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+  
+      # Set up python environment using the specified python version.
+      - name: Use Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # Set up pipenv 
+      - name: Use pipenv ${{ env.PIP_VERSION }}
+        uses: tiagovrtr/actions-pipenv@v1
+        with:
+          pipenv-version: ${{ env.PIP_VERSION }}
+
+      # Install the dependencies.
+      - name: Install the dependencies
+        run: |
+          cd backend && pipenv install 
+   
+      # Run the linter
+      -  name: Run the test 
+         run: |
+          cd backend && pipenv run test  
+
+  build:  
+   needs: [lint, test]     
+   runs-on: ubuntu-latest
+
+   steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    # Set up python environment using the specified python version.
+    - name: Use Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+      # Set up pipenv 
+    - name: Use pipenv ${{ env.PIP_VERSION }}
+      uses: tiagovrtr/actions-pipenv@v1
+      with:
+          pipenv-version: ${{ env.PIP_VERSION }}
+
+    # Install the dependencies.
+    - name: Install the dependencies
+      run: |
+        cd backend && pipenv install
+
+    # Run the linter
+    -  name: Run the test 
+       run: |
+        cd backend && pipenv run test  
+
+    # Build the application
+    - name: Build the application
+      run: |
+        cd backend && docker build -t rahulmanchanda/movie-picture/backend:0.1 .
+ 
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+     
+    - name: Login to ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+     
+    - name: Build, tag, and push docker image to Amazon ECR Public
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REPOSITORY: backend
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+             cd backend
+             docker build -t $REGISTRY/$REPOSITORY:${GITHUB_SHA::7} .
+             docker push $REGISTRY/$REPOSITORY:${GITHUB_SHA::7}
+     
+    - name: Kubeconfig Auth
+      run: |
+            aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+     
+    - name: Install kustomize
+      uses: imranismail/setup-kustomize@v2
+     
+    - name: Deploy the Docker image to Amazon EKS
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+        REPOSITORY: backend
+      run: |
+        cd frontend/k8s
+        kustomize edit set image frontend=$REGISTRY/$REPOSITORY:${GITHUB_SHA::7}
+        kustomize build | kubectl apply -f -
+        kubectl get deployments
+        kubectl get services -o wide      
