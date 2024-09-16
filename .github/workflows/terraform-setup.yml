@@ -19,7 +19,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
+        #aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
         aws-region: ${{ env.AWS_REGION }} # Use the region from your environment variables
 
     - name: Setup Terraform
@@ -31,25 +31,22 @@ jobs:
 
     - name: Terraform Validate
       run: |
+        aws sts get-caller-identity
         cd setup/terraform && terraform validate 
 
-    - name: Terraform Destroy
+    - name: Terraform Plan
       run: |
-       terraform apply -destroy
+         cd setup/terraform && terraform plan 
+         continue-on-error: true
 
-
-   # - name: Terraform Plan
-   #   run: |
-   #      cd setup/terraform && terraform plan 
-     # continue-on-error: true
-
-   # - name: Terraform Apply
+    - name: Terraform Apply
      # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-   #   run: |
-    #     echo github.ref
-     #    echo github.event_name
-     #    cd setup/terraform && terraform apply -auto-approve
-     #    continue-on-error: true
+      run: |
+         echo github.ref
+         echo github.event_name
+         aws sts get-caller-identity
+         cd setup/terraform && terraform apply -auto-approve
+         continue-on-error: true
 
 
         
