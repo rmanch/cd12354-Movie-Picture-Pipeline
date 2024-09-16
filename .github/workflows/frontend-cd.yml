@@ -14,7 +14,8 @@ env:
   REACT_APP_MOVIE_API_URL: 'http://localhost:5000'
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+  #IMAGE_NAME: 'frontend'
+  #AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
 
 
 jobs:
@@ -59,11 +60,6 @@ jobs:
     - name: Install the dependencies
       run: |
         cd frontend && npm ci
-    
-    # Run the linter
-    - name: Run the test 
-      run: |
-        cd frontend && npm run test   
                             
     # Run the tests.
     - run: |
@@ -95,17 +91,26 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
+    - name: Build the docker image
+      env:
+        REACT_APP_MOVIE_API_URL: ${{ secrets.REACT_APP_MOVIE_API_URL }}
+      run: |
+            docker build \
+                  --build-arg=REACT_APP_MOVIE_API_URL="http://$REACT_APP_MOVIE_API_URL/" \
+                  -t $IMAGE_NAME:${GITHUB_SHA::7} \
+
     - name: Login to ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Build and push image to Amazon ECR
+    - name: Build, tag, and push docker image to Amazon ECR Public
       env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: frontend
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REACT_APP_MOVIE_API_URL: ${{ secrets.REACT_APP_MOVIE_API_URL }}
+        #REGISTRY_ALIAS: my-ecr-registry-alias
+        REPOSITORY: frontend
+        IMAGE_TAG: ${{ github.sha }}
       run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 727364028313.dkr.ecr.us-east-1.amazonaws.com
-          cd frontend/
-          docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 -t frontend .
-          docker tag frontend:latest 727364028313.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
-          docker push 727364028313.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+        docker build --build-arg=REACT_APP_MOVIE_API_URL="http://$REACT_APP_MOVIE_API_URL/"  -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+        docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+        
