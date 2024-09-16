@@ -119,5 +119,5 @@ jobs:
           cd frontend/k8s
           kustomize edit set image frontend=$REGISTRY/$REPOSITORY:$IMAGE_TAG
           kustomize build | kubectl apply -f -
-          kubectl rollout status deployment/$DEPLOYMENT_NAME
+          kubectl rollout status deployment/frontend
           kubectl get services -o wide
