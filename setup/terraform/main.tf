@@ -270,4 +270,5 @@ resource "aws_iam_user" "github_action_user" {
 #    actions   = ["ecr:*", "eks:*", "ec2:*"] # "iam:GetUser"
 #    resources = ["*"]
 #  }
-}
+#}
+
