@@ -11,7 +11,6 @@ env:
   NODE_VERSION: '18.x'
   AWS_REGION: us-east-1     # Update this to your AWS Region
   TF_ACTION_WORKING_DIR: 'terraform' # Update this to your Terraform files directory
-  REACT_APP_MOVIE_API_URL: 'http://localhost:5000'
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   EKS_CLUSTER_NAME: cluster
