@@ -99,7 +99,6 @@ jobs:
       env:
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         REACT_APP_MOVIE_API_URL: ${{ secrets.REACT_APP_MOVIE_API_URL }}
-        #REGISTRY_ALIAS: my-ecr-registry-alias
         REPOSITORY: frontend
         IMAGE_TAG: ${{ github.sha }}
       run: |
@@ -107,3 +106,12 @@ jobs:
         docker build --build-arg=REACT_APP_MOVIE_API_URL="http://$REACT_APP_MOVIE_API_URL/"  -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         
+    - name: Deploy to K8s
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REPOSITORY: frontend
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+          cd frontend/k8s
+          kustomize edit set image frontend=$REGISTRY/$REPOSITORY:$IMAGE_TAG
+          kustomize build | kubectl apply -f -
