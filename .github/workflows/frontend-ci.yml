@@ -54,12 +54,13 @@ jobs:
         cd frontend && npm ci
     
     # Run the linter
-    - name: Run the test 
+    - name: Run the linter
       run: |
-        cd frontend && npm run test   
+        cd frontend && npm run lint   
                             
     # Run the tests.
-    - run: |
+    - name: Run the test    
+      run: |
        cd frontend && npm test
 
   build:  
