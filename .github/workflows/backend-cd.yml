@@ -105,11 +105,6 @@ jobs:
     -  name: Run the test 
        run: |
         cd backend && pipenv run test  
-
-    # Build the application
-    - name: Build the application
-      run: |
-        cd backend && docker build -t rahulmanchanda/movie-picture/backend:0.1 .
  
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -148,5 +143,6 @@ jobs:
         cd backend/k8s
         kustomize edit set image backend=$REGISTRY/$REPOSITORY:${GITHUB_SHA::7}
         kustomize build | kubectl apply -f -
+        kubectl get nodes
         kubectl get deployments
         kubectl get services -o wide      
