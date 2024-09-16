@@ -118,6 +118,7 @@ jobs:
       env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
+          REPOSITORY: frontend
       run: |
           cd frontend/k8s
           kustomize edit set image frontend=$REGISTRY/$REPOSITORY:${GITHUB_SHA::7}
