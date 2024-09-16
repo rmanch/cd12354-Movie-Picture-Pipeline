@@ -256,7 +256,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
 # Github Action role
 ####################
 resource "aws_iam_user" "github_action_user" {
- name = "github-action-user1"
+ name = "github-action-user2"
 }
 
 resource "aws_iam_user_policy" "github_action_user_permission" {
